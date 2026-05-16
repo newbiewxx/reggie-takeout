@@ -1,5 +1,6 @@
 package com.wxx.service.impl; // Service 实现包
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper; // MyBatis-Plus 条件构造器
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl; // MyBatis-Plus 基础实现类
 import com.wxx.domain.Dish; // 菜品实体类
 import com.wxx.domain.DishFlavor; // 菜品口味实体类
@@ -24,7 +25,6 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
      * @param dto 菜品信息 + 口味列表
      */
     @Override
-    @Transactional // 保证菜品和口味同时保存或回滚
     public void saveWithFlavors(DishDto dto) {
         // 1. 保存菜品基本信息
         this.save(dto);
@@ -38,6 +38,33 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             }
             dishFlavorService.saveBatch(dto.getFlavors());
             log.info("新增菜品口味 - 数量={}", dto.getFlavors().size());
+        }
+    }
+
+    /**
+     * 修改菜品，同时更新口味信息（先删后插）
+     * @param dto 菜品信息 + 口味列表
+     */
+    @Override
+    public void updateWithFlavors(DishDto dto) {
+        // 1. 更新菜品基本信息
+        this.updateById(dto);
+        Long dishId = dto.getId();
+        log.info("更新菜品 - ID={}, name={}", dishId, dto.getName());
+
+        // 2. 删除原有口味
+        LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DishFlavor::getDishId, dishId);
+        dishFlavorService.remove(queryWrapper);
+
+        // 3. 重新插入新口味
+        if (dto.getFlavors() != null && !dto.getFlavors().isEmpty()) {
+            for (DishFlavor flavor : dto.getFlavors()) {
+                flavor.setDishId(dishId);
+                flavor.setId(null); // 新插入，清除旧 ID
+            }
+            dishFlavorService.saveBatch(dto.getFlavors());
+            log.info("更新菜品口味 - 数量={}", dto.getFlavors().size());
         }
     }
 }
