@@ -2,6 +2,7 @@ package com.wxx.service.impl; // Service 实现包
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper; // MyBatis-Plus 条件构造器
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl; // MyBatis-Plus 基础实现类
+import java.util.List; // 集合接口
 import com.wxx.domain.Dish; // 菜品实体类
 import com.wxx.domain.DishFlavor; // 菜品口味实体类
 import com.wxx.dto.DishDto; // 菜品 DTO
@@ -66,5 +67,22 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             dishFlavorService.saveBatch(dto.getFlavors());
             log.info("更新菜品口味 - 数量={}", dto.getFlavors().size());
         }
+    }
+
+    /**
+     * 删除菜品（含关联口味）
+     * @param ids 菜品 ID 列表
+     */
+    @Override
+    public void deleteWithFlavors(List<Long> ids) {
+        log.info("删除菜品（含口味） - ids={}", ids);
+
+        // 1. 删除关联口味
+        LambdaQueryWrapper<DishFlavor> flavorQuery = new LambdaQueryWrapper<>();
+        flavorQuery.in(DishFlavor::getDishId, ids);
+        dishFlavorService.remove(flavorQuery);
+
+        // 2. 删除菜品（逻辑删除，@TableLogic 自动处理）
+        this.removeByIds(ids);
     }
 }

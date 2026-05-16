@@ -159,8 +159,7 @@ public class DishController {
                 .map(Long::parseLong)
                 .collect(Collectors.toList());
 
-        dishService.removeByIds(idList);
-        log.info("删除成功 - ids={}", ids);
+        dishService.deleteWithFlavors(idList);
         return R.success("删除成功");
     }
 
