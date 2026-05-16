@@ -7,14 +7,13 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.UUID;
-
-// import static org.springframework.util.FileCopyUtils.copy;
 
 @RestController
 @Slf4j
@@ -23,6 +22,16 @@ public class CommonController {
 
     @Value("${reggie.upload-path}")
     private String uploadPath;
+
+    @PostConstruct
+    public void init() {
+        File dir = new File(uploadPath);
+        if (!dir.isAbsolute()) {
+            dir = new File(System.getProperty("user.dir"), uploadPath);
+        }
+        uploadPath = dir.getAbsolutePath() + File.separator;
+        log.info("文件上传目录 - {}", uploadPath);
+    }
 
     @PostMapping("/upload")
     public R<String> upload(MultipartFile file) {
@@ -64,7 +73,6 @@ public class CommonController {
             ServletOutputStream os = response.getOutputStream()
         ) {
             response.setContentType("image/jpeg");
-            // copy(fis, os);
             FileCopyUtils.copy(fis, os);
         } catch (IOException e) {
             log.error("文件下载失败 - name={}", name, e);
