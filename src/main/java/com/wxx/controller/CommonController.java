@@ -54,6 +54,11 @@ public class CommonController {
     public void download(String name, HttpServletResponse response) {
         log.info("文件下载 - name={}", name);
 
+        if (name == null || name.isEmpty()) {
+            log.warn("文件下载失败 - 文件名为空");
+            return;
+        }
+
         try (
             FileInputStream fis = new FileInputStream(uploadPath + name);
             ServletOutputStream os = response.getOutputStream()
