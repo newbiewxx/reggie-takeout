@@ -6,7 +6,9 @@ import com.wxx.common.R; // 统一响应结果封装类
 import com.wxx.domain.Category; // 分类实体类
 import com.wxx.domain.Dish; // 菜品实体类
 import com.wxx.dto.DishDto; // 菜品 DTO
+import com.wxx.domain.DishFlavor; // 菜品口味实体类
 import com.wxx.service.CategoryService; // 分类服务接口
+import com.wxx.service.DishFlavorService; // 菜品口味服务接口
 import com.wxx.service.DishService; // 菜品服务接口
 import lombok.RequiredArgsConstructor; // Lombok：生成带 final 字段的构造器注入
 import lombok.extern.slf4j.Slf4j; // Lombok：日志对象
@@ -37,6 +39,7 @@ public class DishController {
 
     private final DishService dishService; // 菜品服务（构造器注入）
     private final CategoryService categoryService; // 分类服务（构造器注入）
+    private final DishFlavorService dishFlavorService; // 菜品口味服务（构造器注入）
 
     /**
      * 菜品分页查询
@@ -77,6 +80,32 @@ public class DishController {
 
         dtoPage.setRecords(dtoList);
         return R.success(dtoPage);
+    }
+
+    /**
+     * 根据 ID 查询菜品（含口味信息，用于回显）
+     * @param id 菜品 ID
+     * @return 统一响应结果（含菜品信息 + 口味列表）
+     */
+    @GetMapping("/{id}") // GET /dish/{id}
+    public R<DishDto> get(@PathVariable Long id) {
+        log.info("查询菜品 - ID={}", id);
+
+        Dish dish = dishService.getById(id);
+        if (dish == null) {
+            return R.error("菜品不存在");
+        }
+
+        // 复制到 DTO
+        DishDto dto = new DishDto();
+        BeanUtils.copyProperties(dish, dto);
+
+        // 查询口味列表
+        LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DishFlavor::getDishId, id);
+        dto.setFlavors(dishFlavorService.list(queryWrapper));
+
+        return R.success(dto);
     }
 
     /**
