@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper; // MyB
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page; // MyBatis-Plus 分页对象
 import com.wxx.common.R; // 统一响应结果封装类
 import com.wxx.domain.Category; // 分类实体类
+import java.util.List; // 列表返回
 import com.wxx.service.CategoryService; // 分类服务接口
 import lombok.RequiredArgsConstructor; // Lombok：生成带 final 字段的构造器注入
 import lombok.extern.slf4j.Slf4j; // Lombok：日志对象
@@ -52,6 +53,23 @@ public class CategoryController {
         // 3. 执行分页查询
         categoryService.page(pageInfo, queryWrapper);
         return R.success(pageInfo);
+    }
+
+    /**
+     * 分类列表（用于下拉选择）
+     * @param type 可选：按类型筛选（1=菜品分类，2=套餐分类）
+     * @return 分类列表
+     */
+    @GetMapping("/list") // GET /category/list?type=1
+    public R<List<Category>> list(Integer type) {
+        log.info("分类列表查询 - type={}", type);
+
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(type != null, Category::getType, type);
+        queryWrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
+
+        List<Category> list = categoryService.list(queryWrapper);
+        return R.success(list);
     }
 
     /**
