@@ -27,8 +27,10 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         Long setmealId = dto.getId();
         log.info("新增套餐 - ID={}, name={}", setmealId, dto.getName());
 
-        if (dto.getSetmealDishes() != null && !dto.getSetmealDishes().isEmpty()) {
-            for (SetmealDish dish : dto.getSetmealDishes()) {
+        List<SetmealDish> setmealDishes = dto.getSetmealDishes();
+
+        if (setmealDishes != null && !setmealDishes.isEmpty()) {
+            for (SetmealDish dish : setmealDishes) {
                 dish.setSetmealId(setmealId);
             }
             setmealDishService.saveBatch(dto.getSetmealDishes());
