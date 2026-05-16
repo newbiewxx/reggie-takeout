@@ -13,6 +13,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.UUID;
 
+import static org.springframework.util.FileCopyUtils.copy;
+
 @RestController
 @Slf4j
 @RequestMapping("common")
@@ -52,16 +54,11 @@ public class CommonController {
         log.info("文件下载 - name={}", name);
 
         try (
-            FileInputStream fis = new FileInputStream(new File(uploadPath + name));
+            FileInputStream fis = new FileInputStream(uploadPath + name);
             ServletOutputStream os = response.getOutputStream()
         ) {
             response.setContentType("image/jpeg");
-            byte[] buffer = new byte[1024];
-            int len;
-            while ((len = fis.read(buffer)) != -1) {
-                os.write(buffer, 0, len);
-                os.flush();
-            }
+            copy(fis, os);
         } catch (IOException e) {
             log.error("文件下载失败 - name={}", name, e);
         }
