@@ -14,7 +14,7 @@ spring: # Spring 框架配置
       max-request-size: 100MB    # 单次请求最大大小
 
 reggie:
-  upload-path: /Users/wxx/Documents/be-restart/practice-project/reggie-takeout/src/main/resources/upload/
+  upload-path: upload/
 
 mybatis-plus: # MyBatis-Plus 配置
   configuration: # MyBatis 运行时配置
