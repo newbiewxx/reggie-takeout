@@ -1,7 +1,29 @@
-package com.wxx.service; // 服务接口包
+package com.wxx.service;
 
-import com.baomidou.mybatisplus.extension.service.IService; // MyBatis-Plus 基础 Service 接口
-import com.wxx.domain.Setmeal; // 套餐实体类
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.wxx.domain.Setmeal;
+import com.wxx.dto.SetmealDto;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface SetmealService extends IService<Setmeal> { // 继承 IService，自动提供 CRUD 方法
+import java.util.List;
+
+public interface SetmealService extends IService<Setmeal> {
+
+    /**
+     * 新增套餐（含套餐内菜品）
+     */
+    @Transactional
+    void saveWithDishes(SetmealDto dto);
+
+    /**
+     * 修改套餐（含套餐内菜品）
+     */
+    @Transactional
+    void updateWithDishes(SetmealDto dto);
+
+    /**
+     * 删除套餐（含关联菜品）
+     */
+    @Transactional
+    void deleteWithDishes(List<Long> ids);
 }

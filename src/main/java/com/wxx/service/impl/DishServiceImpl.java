@@ -23,10 +23,18 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
     /**
      * 新增菜品，同时保存口味信息
+     * 如果存在已逻辑删除的同名菜品，先将其名称改为 "原名_已被删除"
      * @param dto 菜品信息 + 口味列表
      */
     @Override
     public void saveWithFlavors(DishDto dto) {
+        // 查询已逻辑删除的同名菜品，改名以释放唯一约束
+        List<Dish> deletedList = baseMapper.selectDeletedByName(dto.getName());
+        for (Dish deleted : deletedList) {
+            baseMapper.renameDeletedById(deleted.getId(), deleted.getName() + "_已被删除");
+            log.info("同名已删除菜品已改名 - ID={}, 原名称={}", deleted.getId(), dto.getName());
+        }
+
         // 1. 保存菜品基本信息
         this.save(dto);
         Long dishId = dto.getId();
@@ -44,10 +52,21 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
     /**
      * 修改菜品，同时更新口味信息（先删后插）
+     * 如果存在已逻辑删除的同名菜品，先将其名称改为 "原名_已被删除"
      * @param dto 菜品信息 + 口味列表
      */
     @Override
     public void updateWithFlavors(DishDto dto) {
+        // 查询已逻辑删除的同名菜品（排除自身），改名以释放唯一约束
+        List<Dish> deletedList = baseMapper.selectDeletedByName(dto.getName());
+        for (Dish deleted : deletedList) {
+            if (deleted.getId().equals(dto.getId())) {
+                continue;
+            }
+            baseMapper.renameDeletedById(deleted.getId(), deleted.getName() + "_已被删除");
+            log.info("同名已删除菜品已改名 - ID={}, 原名称={}", deleted.getId(), dto.getName());
+        }
+
         // 1. 更新菜品基本信息
         this.updateById(dto);
         Long dishId = dto.getId();

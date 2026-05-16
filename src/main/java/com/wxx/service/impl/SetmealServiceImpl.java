@@ -1,12 +1,69 @@
-package com.wxx.service.impl; // Service 实现包
+package com.wxx.service.impl;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl; // MyBatis-Plus 基础实现类
-import com.wxx.domain.Setmeal; // 套餐实体类
-import com.wxx.mapper.SetmealMapper; // 套餐 Mapper
-import com.wxx.service.SetmealService; // 套餐 Service 接口
-import org.springframework.stereotype.Service; // Spring 服务注解
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wxx.domain.Setmeal;
+import com.wxx.domain.SetmealDish;
+import com.wxx.dto.SetmealDto;
+import com.wxx.mapper.SetmealMapper;
+import com.wxx.service.SetmealDishService;
+import com.wxx.service.SetmealService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
-@Service // 声明为 Spring Bean，自动扫描注入
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> implements SetmealService {
-    // 继承 ServiceImpl 已自动实现 IService 的所有 CRUD 方法，无需额外代码
+
+    private final SetmealDishService setmealDishService;
+
+    @Override
+    public void saveWithDishes(SetmealDto dto) {
+        this.save(dto);
+        Long setmealId = dto.getId();
+        log.info("新增套餐 - ID={}, name={}", setmealId, dto.getName());
+
+        if (dto.getSetmealDishes() != null && !dto.getSetmealDishes().isEmpty()) {
+            for (SetmealDish dish : dto.getSetmealDishes()) {
+                dish.setSetmealId(setmealId);
+            }
+            setmealDishService.saveBatch(dto.getSetmealDishes());
+            log.info("新增套餐菜品 - 数量={}", dto.getSetmealDishes().size());
+        }
+    }
+
+    @Override
+    public void updateWithDishes(SetmealDto dto) {
+        this.updateById(dto);
+        Long setmealId = dto.getId();
+        log.info("更新套餐 - ID={}, name={}", setmealId, dto.getName());
+
+        LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SetmealDish::getSetmealId, setmealId);
+        setmealDishService.remove(queryWrapper);
+
+        if (dto.getSetmealDishes() != null && !dto.getSetmealDishes().isEmpty()) {
+            for (SetmealDish dish : dto.getSetmealDishes()) {
+                dish.setSetmealId(setmealId);
+                dish.setId(null);
+            }
+            setmealDishService.saveBatch(dto.getSetmealDishes());
+            log.info("更新套餐菜品 - 数量={}", dto.getSetmealDishes().size());
+        }
+    }
+
+    @Override
+    public void deleteWithDishes(List<Long> ids) {
+        log.info("删除套餐（含关联菜品） - ids={}", ids);
+
+        LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(SetmealDish::getSetmealId, ids);
+        setmealDishService.remove(queryWrapper);
+
+        this.removeByIds(ids);
+    }
 }
