@@ -3,6 +3,7 @@ package com.wxx.controller;
 import com.wxx.common.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,7 +14,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.UUID;
 
-import static org.springframework.util.FileCopyUtils.copy;
+// import static org.springframework.util.FileCopyUtils.copy;
 
 @RestController
 @Slf4j
@@ -58,7 +59,8 @@ public class CommonController {
             ServletOutputStream os = response.getOutputStream()
         ) {
             response.setContentType("image/jpeg");
-            copy(fis, os);
+            // copy(fis, os);
+            FileCopyUtils.copy(fis, os);
         } catch (IOException e) {
             log.error("文件下载失败 - name={}", name, e);
         }
