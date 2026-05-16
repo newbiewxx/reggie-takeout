@@ -1,0 +1,19 @@
+server: # 服务器配置
+  port: 8888 # 服务器端口号
+spring: # Spring 框架配置
+  datasource: # 数据源配置
+    druid: # 使用 Druid 数据库连接池
+      driver-class-name: com.mysql.cj.jdbc.Driver # MySQL 数据库驱动类
+      url: jdbc:mysql://localhost:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true # 数据库连接地址（含时区、编码、允许多查询）
+      username: root # 数据库用户名
+      password: springboot666.. # 数据库密码
+
+mybatis-plus: # MyBatis-Plus 配置
+  configuration: # MyBatis 运行时配置
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # SQL 日志输出到控制台
+    # user_name => UserName
+    map-underscore-to-camel-case: true # 开启下划线转驼峰命名映射
+
+  global-config: # 全局策略配置
+    db-config: # 数据库相关配置
+      id-type: assign_id # 主键生成策略：使用雪花算法分配 ID
