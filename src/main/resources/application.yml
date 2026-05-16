@@ -8,6 +8,14 @@ spring: # Spring 框架配置
       username: root # 数据库用户名
       password: springboot666.. # 数据库密码
 
+  servlet:
+    multipart:
+      max-file-size: 10MB        # 单个文件最大大小
+      max-request-size: 100MB    # 单次请求最大大小
+
+reggie:
+  upload-path: /Users/wxx/Documents/be-restart/practice-project/reggie-takeout/src/main/resources/upload/
+
 mybatis-plus: # MyBatis-Plus 配置
   configuration: # MyBatis 运行时配置
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # SQL 日志输出到控制台
