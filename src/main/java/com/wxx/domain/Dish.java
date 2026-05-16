@@ -2,6 +2,7 @@ package com.wxx.domain; // 实体类包
 
 import com.baomidou.mybatisplus.annotation.FieldFill; // MyBatis-Plus 字段填充策略
 import com.baomidou.mybatisplus.annotation.TableField; // MyBatis-Plus 表字段注解
+import com.baomidou.mybatisplus.annotation.TableLogic; // MyBatis-Plus 逻辑删除注解
 import lombok.Data; // Lombok：自动生成 getter/setter/toString 等
 import java.io.Serializable; // 序列化接口
 import java.math.BigDecimal; // 金额高精度类型
@@ -37,6 +38,10 @@ public class Dish implements Serializable { // 菜品实体，实现序列化
 
     /** 排序序号，值越小越靠前 */
     private Integer sort;
+
+    /** 逻辑删除标志：0=未删除，1=已删除 */
+    @TableLogic
+    private Integer isDeleted;
 
     @TableField(fill = FieldFill.INSERT) // 插入时自动填充
     private LocalDateTime createTime; // 创建时间

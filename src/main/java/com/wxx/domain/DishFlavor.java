@@ -2,6 +2,7 @@ package com.wxx.domain; // 实体类包
 
 import com.baomidou.mybatisplus.annotation.FieldFill; // MyBatis-Plus 字段填充策略
 import com.baomidou.mybatisplus.annotation.TableField; // MyBatis-Plus 表字段注解
+import com.baomidou.mybatisplus.annotation.TableLogic; // MyBatis-Plus 逻辑删除注解
 import lombok.Data; // Lombok：自动生成 getter/setter/toString 等
 import java.io.Serializable; // 序列化接口
 import java.time.LocalDateTime; // Java 8 时间类型
@@ -21,6 +22,10 @@ public class DishFlavor implements Serializable { // 菜品口味实体
 
     /** 口味标签列表（JSON 字符串，如 ["微辣","中辣","特辣"]） */
     private String value;
+
+    /** 逻辑删除标志：0=未删除，1=已删除 */
+    @TableLogic
+    private Integer isDeleted;
 
     @TableField(fill = FieldFill.INSERT) // 插入时自动填充
     private LocalDateTime createTime; // 创建时间
