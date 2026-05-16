@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -143,19 +142,14 @@ public class SetmealController {
      * @return 统一响应结果
      */
     @DeleteMapping
-    public R<String> delete(@RequestParam String ids) {
+    public R<String> delete(@RequestParam List<Long> ids) {
         log.info("删除套餐 - ids={}", ids);
 
-        if (StringUtils.isEmpty(ids)) {
+        if (ids == null || ids.isEmpty()) {
             return R.error("删除失败，套餐ID不能为空");
         }
 
-        List<Long> idList = Arrays.stream(ids.split(","))
-                .map(String::trim)
-                .map(Long::parseLong)
-                .collect(Collectors.toList());
-
-        setmealService.deleteWithDishes(idList);
+        setmealService.deleteWithDishes(ids);
         return R.success("删除成功");
     }
 
@@ -167,23 +161,18 @@ public class SetmealController {
      */
     @PostMapping("/status/{status}")
     public R<String> status(@PathVariable Integer status,
-                            @RequestParam String ids) {
+                            @RequestParam List<Long> ids) {
         log.info("修改套餐状态 - status={}, ids={}", status, ids);
 
-        if (StringUtils.isEmpty(ids)) {
+        if (ids == null || ids.isEmpty()) {
             return R.error("操作失败，套餐ID不能为空");
         }
         if (status == null || (status != 0 && status != 1)) {
             return R.error("操作失败，状态值无效");
         }
 
-        List<Long> idList = Arrays.stream(ids.split(","))
-                .map(String::trim)
-                .map(Long::parseLong)
-                .collect(Collectors.toList());
-
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(Setmeal::getId, idList);
+        queryWrapper.in(Setmeal::getId, ids);
 
         Setmeal setmeal = new Setmeal();
         setmeal.setStatus(status);
