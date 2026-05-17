@@ -81,6 +81,23 @@ public class SetmealController {
     }
 
     /**
+     * 根据分类 ID 查询套餐列表（C 端使用，仅返回起售套餐）
+     * @param categoryId 分类 ID
+     * @return 套餐列表
+     */
+    @GetMapping("/list")
+    public R<List<Setmeal>> list(Long categoryId) {
+        log.info("套餐列表查询 - categoryId={}", categoryId);
+
+        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(categoryId != null, Setmeal::getCategoryId, categoryId);
+        queryWrapper.eq(Setmeal::getStatus, 1);
+        queryWrapper.orderByDesc(Setmeal::getUpdateTime);
+
+        return R.success(setmealService.list(queryWrapper));
+    }
+
+    /**
      * 根据 ID 查询套餐（含套餐内菜品）
      * @param id 套餐 ID
      * @return 统一响应结果（含套餐信息 + 菜品列表）

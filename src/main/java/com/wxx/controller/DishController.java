@@ -89,7 +89,7 @@ public class DishController {
      * @return 菜品列表
      */
     @GetMapping("/list")
-    public R<List<Dish>> list(Long categoryId) {
+    public R<List<DishDto>> list(Long categoryId) {
         log.info("菜品列表查询 - categoryId={}", categoryId);
 
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
@@ -97,7 +97,36 @@ public class DishController {
         queryWrapper.eq(Dish::getStatus, 1);
         queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
 
-        return R.success(dishService.list(queryWrapper));
+        List<Dish> dishList = dishService.list(queryWrapper);
+
+        // 批量查询分类名称
+        Set<Long> categoryIds = dishList.stream()
+                .map(Dish::getCategoryId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<Long, String> categoryMap = categoryIds.isEmpty() ? Collections.emptyMap() :
+                categoryService.listByIds(categoryIds).stream()
+                        .collect(Collectors.toMap(Category::getId, Category::getName));
+
+        // 批量查询所有菜品对应的口味
+        List<Long> dishIds = dishList.stream().map(Dish::getId).collect(Collectors.toList());
+        Map<Long, List<DishFlavor>> flavorMap = dishIds.isEmpty() ? Collections.emptyMap() :
+                dishFlavorService.lambdaQuery()
+                        .in(DishFlavor::getDishId, dishIds)
+                        .list()
+                        .stream()
+                        .collect(Collectors.groupingBy(DishFlavor::getDishId));
+
+        List<DishDto> dtoList = dishList.stream().map(dish -> {
+            DishDto dto = new DishDto();
+            BeanUtils.copyProperties(dish, dto);
+            dto.setCategoryName(categoryMap.get(dish.getCategoryId()));
+            dto.setFlavors(flavorMap.getOrDefault(dish.getId(), Collections.emptyList()));
+            return dto;
+        }).collect(Collectors.toList());
+
+        return R.success(dtoList);
     }
 
     /**
