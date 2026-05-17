@@ -35,6 +35,8 @@ public class LoginCheckFilter implements Filter { // 登录校验过滤器
                     "/employee/logout",   // 退出接口
                     "/backend/**",        // 后台静态资源
                     "/front/**",          // 前端静态资源
+                    "/user/sendMsg",        // 发送验证码
+                    "/user/login",          // 登录接口
             };
 
             // 判断当前请求是否匹配放行路径
@@ -48,11 +50,20 @@ public class LoginCheckFilter implements Filter { // 登录校验过滤器
 
             // 需要登录校验的请求：从 Session 获取登录用户 ID
             Long empId = BaseContext.getCurrentEmployeeId();
+            Long userId = BaseContext.getCurrentUserId();
 
             if (empId != null) {
                 log.info("用户已登录 - ID：{}", empId);
                 // 将用户 ID 存入 ThreadLocal，供后续业务层使用（如 MetaObjectHandler 自动填充）
                 BaseContextPlus.setCurrentId(empId);
+                filterChain.doFilter(request, response); // 放行
+                return;
+            }
+
+            if (userId != null) {
+                log.info("用户已登录 - ID：{}", userId);
+                // 将用户 ID 存入 ThreadLocal，供后续业务层使用（如 MetaObjectHandler 自动填充）
+                BaseContextPlus.setCurrentId(userId);
                 filterChain.doFilter(request, response); // 放行
                 return;
             }
@@ -69,6 +80,7 @@ public class LoginCheckFilter implements Filter { // 登录校验过滤器
 
     /**
      * 判断请求路径是否匹配放行列表
+     *
      * @param urls       放行路径模式
      * @param requestURI 当前请求路径
      * @return true=放行，false=需登录校验

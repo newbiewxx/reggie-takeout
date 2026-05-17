@@ -14,6 +14,8 @@ public class BaseContext {
 
     // 员工 ID 在 Session 中存储的 key
     private static final String EMPLOYEE_SESSION_KEY = "employee";
+    // C 端用户 ID 在 Session 中存储的 key
+    private static final String USER_SESSION_KEY = "user";
 
     /**
      * 获取当前请求的 HttpServletRequest
@@ -29,6 +31,8 @@ public class BaseContext {
     public static HttpSession getSession() {
         return getRequest().getSession();
     }
+
+    // ==================== B 端员工 ====================
 
     /**
      * 设置当前登录员工 ID 到 Session
@@ -51,5 +55,30 @@ public class BaseContext {
      */
     public static void removeCurrentEmployeeId() {
         getSession().removeAttribute(EMPLOYEE_SESSION_KEY);
+    }
+
+    // ==================== C 端用户 ====================
+
+    /**
+     * 设置当前登录用户 ID 到 Session
+     * @param id 用户 ID
+     */
+    public static void setCurrentUserId(Long id) {
+        getSession().setAttribute(USER_SESSION_KEY, id);
+    }
+
+    /**
+     * 获取当前登录用户 ID
+     * @return 用户 ID，未登录返回 null
+     */
+    public static Long getCurrentUserId() {
+        return (Long) getSession().getAttribute(USER_SESSION_KEY);
+    }
+
+    /**
+     * 清除当前登录用户信息（退出登录）
+     */
+    public static void removeCurrentUserId() {
+        getSession().removeAttribute(USER_SESSION_KEY);
     }
 }
