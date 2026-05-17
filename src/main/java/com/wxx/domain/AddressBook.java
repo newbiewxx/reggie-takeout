@@ -1,4 +1,4 @@
-package com.itheima.reggie.entity;
+package com.wxx.domain;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -87,6 +87,7 @@ public class AddressBook implements Serializable {
     private Long updateUser;
 
 
+    @TableField
     //是否删除
     private Integer isDeleted;
 }
